@@ -478,7 +478,7 @@ export default function RegistrationForm() {
                           className={`w-full${
                             errors.mobile ? " input-field-error" : ""
                           }`}
-                          inputClassName="bg-slate-950/30 border-0 border-b-2 border-slate-600 rounded-[12px] focus:border-[#22c55e] px-0 shadow-none focus:outline-none focus:ring-0 py-2 text-slate-100 placeholder:text-slate-500"
+                          inputClassName="w-full bg-slate-950/30 border-0 border-b-2 border-slate-600 rounded-[12px] focus:border-[#22c55e] px-0 shadow-none focus:outline-none focus:ring-0 py-2 text-slate-100 placeholder:text-slate-500"
                           placeholder="Phone Number *"
                           countrySelectorStyleProps={{
                             buttonClassName:

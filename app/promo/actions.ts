@@ -223,31 +223,33 @@ export async function submitRegistration(prevState: FormState, formData: FormDat
       html: htmlTemplate,
     })
 
-    // Send auto-reply to the user
+    // Send auto-reply to the user (Refined HTML for better deliverability)
     const userHtmlTemplate = `
-      <div style="background-color: #0A343D; padding: 40px 20px; font-family: Arial, sans-serif; min-height: 100%;">
-        <div style="max-width: 600px; margin: 0 auto; background-color: #0A343D; border: 1px solid #145c6b; border-radius: 8px; overflow: hidden; color: #ffffff;">
-          <div style="text-align: center; border-bottom: 3px solid #22c55e;">
-            <img src="https://firebasestorage.googleapis.com/v0/b/aiacwestafrica-e2073.firebasestorage.app/o/email_template_components%2FEmail%20Signature-04.jpg?alt=media&token=8270f300-9fce-4a9d-bd69-7fa1715656d6" alt="AIAC WEST AFRICA" style="width: 100%; max-width: 600px; height: auto; display: block; border: none;" />
-          </div>
-          <div style="padding: 30px;">
-            <h2 style="color: #22c55e; margin-top: 0;">Registration Successful!</h2>
-            <p style="color: #e2e8f0; font-size: 16px; line-height: 1.6;">Dear ${firstName},</p>
-            <p style="color: #e2e8f0; font-size: 16px; line-height: 1.6;">Thank you for your submission! Your registration has been successfully received.</p>
-            <p style="color: #e2e8f0; font-size: 16px; line-height: 1.6;">Our team is reviewing your details and will contact you shortly with more information.</p>
-            <br>
-            <p style="color: #cbd5e1; font-size: 14px; margin-bottom: 0;">Best regards,<br><strong style="color: #22c55e; font-size: 16px;">The AIAC WEST AFRICA Team</strong></p>
-          </div>
-        </div>
+      <div style="background-color: #ffffff; padding: 40px 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #0A343D; border: 1px solid #145c6b; border-radius: 12px; overflow: hidden; color: #ffffff; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+          <tr>
+            <td style="padding: 40px 30px;">
+              <h2 style="color: #22c55e; margin-top: 0; font-size: 26px;">Registration Successful!</h2>
+              <p style="color: #e2e8f0; font-size: 16px; line-height: 1.6; margin-top: 20px;">Dear ${firstName},</p>
+              <p style="color: #e2e8f0; font-size: 16px; line-height: 1.6;">Thank you for your submission! Your registration has been successfully received.</p>
+              <p style="color: #e2e8f0; font-size: 16px; line-height: 1.6;">Our team is reviewing your details and will contact you shortly with more information.</p>
+              <br/>
+              <p style="color: #cbd5e1; font-size: 14px; margin-bottom: 0;">Best regards,<br/><strong style="color: #22c55e; font-size: 16px;">The AIAC WEST AFRICA Team</strong></p>
+            </td>
+          </tr>
+        </table>
       </div>
     `
 
+    console.log(`Attempting to send auto-reply to: ${email}`)
     await transporter.sendMail({
       from: `"AIAC WEST AFRICA" <${process.env.EMAIL}>`,
       to: email,
       subject: "Registration Successful - AIAC WEST AFRICA",
       html: userHtmlTemplate,
+      text: `Registration Successful!\n\nDear ${firstName},\n\nThank you for your submission! Your registration has been successfully received.\nOur team is reviewing your details and will contact you shortly with more information.\n\nBest regards,\nThe AIAC WEST AFRICA Team`
     })
+    console.log(`Auto-reply sent successfully to: ${email}`)
 
     return { message: "Registration successful!", errors: {} }
   } catch (error) {
