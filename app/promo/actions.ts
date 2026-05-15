@@ -225,13 +225,20 @@ export async function submitRegistration(prevState: FormState, formData: FormDat
 
     // Send auto-reply to the user
     const userHtmlTemplate = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
-        <h2 style="color: #22c55e;">Registration Successful!</h2>
-        <p>Dear ${firstName},</p>
-        <p>Thank you for your submission. Your promocode registration has been successfully received.</p>
-        <p>Our team will contact you shortly.</p>
-        <br>
-        <p>Best regards,<br>The AIAC Africa Team</p>
+      <div style="background-color: #0A343D; padding: 40px 20px; font-family: Arial, sans-serif; min-height: 100%;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #0A343D; border: 1px solid #145c6b; border-radius: 8px; overflow: hidden; color: #ffffff;">
+          <div style="text-align: center; border-bottom: 3px solid #22c55e;">
+            <img src="https://firebasestorage.googleapis.com/v0/b/aiacwestafrica-e2073.firebasestorage.app/o/email_template_components%2FEmail%20Signature-04.jpg?alt=media&token=8270f300-9fce-4a9d-bd69-7fa1715656d6" alt="AIAC Africa" style="width: 100%; max-width: 600px; height: auto; display: block; border: none;" />
+          </div>
+          <div style="padding: 30px;">
+            <h2 style="color: #22c55e; margin-top: 0;">Registration Successful!</h2>
+            <p style="color: #e2e8f0; font-size: 16px; line-height: 1.6;">Dear ${firstName},</p>
+            <p style="color: #e2e8f0; font-size: 16px; line-height: 1.6;">Thank you for your submission! Your registration has been successfully received.</p>
+            <p style="color: #e2e8f0; font-size: 16px; line-height: 1.6;">Our team is reviewing your details and will contact you shortly with more information.</p>
+            <br>
+            <p style="color: #cbd5e1; font-size: 14px; margin-bottom: 0;">Best regards,<br><strong style="color: #22c55e; font-size: 16px;">The AIAC Africa Team</strong></p>
+          </div>
+        </div>
       </div>
     `
 
