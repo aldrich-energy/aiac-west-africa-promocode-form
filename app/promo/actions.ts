@@ -223,6 +223,25 @@ export async function submitRegistration(prevState: FormState, formData: FormDat
       html: htmlTemplate,
     })
 
+    // Send auto-reply to the user
+    const userHtmlTemplate = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+        <h2 style="color: #22c55e;">Registration Successful!</h2>
+        <p>Dear ${firstName},</p>
+        <p>Thank you for your submission. Your promocode registration has been successfully received.</p>
+        <p>Our team will contact you shortly.</p>
+        <br>
+        <p>Best regards,<br>The AIAC Africa Team</p>
+      </div>
+    `
+
+    await transporter.sendMail({
+      from: `"AIAC Africa" <${process.env.EMAIL}>`,
+      to: email,
+      subject: "Registration Successful - AIAC Africa",
+      html: userHtmlTemplate,
+    })
+
     return { message: "Registration successful!", errors: {} }
   } catch (error) {
     console.error("Promo Registration error:", error)
