@@ -237,7 +237,6 @@ export async function submitRegistration(prevState: FormState, formData: FormDat
     if (!email) errors.email = "Email is required"
     if (!mobile) errors.mobile = "Phone number is required"
     if (!mainObjective) errors.mainObjective = "Main objective is required"
-    if (!hearAboutUs) errors.hearAboutUs = "Please select how you heard about us"
     if (!consent) errors.consent = "You must agree to the privacy policy"
     if (!captchaToken) errors.captcha = "Please complete the captcha"
     if (!promocode) errors.promocode = "Promocode is required"

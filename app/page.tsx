@@ -199,7 +199,7 @@ export default function RegistrationForm() {
   // Custom select states
   const [prefix, setPrefix] = useState<string>("Mr.");
   const [mainObjective, setMainObjective] = useState<string>("");
-  const [hearAboutUs, setHearAboutUs] = useState<string>("");
+  const [consentChecked, setConsentChecked] = useState(false);
 
   // Success popup
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
@@ -214,7 +214,6 @@ export default function RegistrationForm() {
         "jobTitle",
         "email",
         "mainObjective",
-        "hearAboutUs",
       ].includes(name) &&
       !value
     ) {
@@ -224,7 +223,7 @@ export default function RegistrationForm() {
       if (!value) return "This field is required";
       if (!isPhoneValid(value)) return "Please enter a valid phone number";
     }
-    if (name === "consent" && !formRef.current?.consent?.checked) {
+    if (name === "consent" && !consentChecked) {
       return "You must agree to the privacy policy";
     }
     if (name === "promocode") {
@@ -249,9 +248,8 @@ export default function RegistrationForm() {
       { name: "email", value: form.email?.value },
       { name: "mobile", value: mobile },
       { name: "mainObjective", value: mainObjective },
-      { name: "hearAboutUs", value: hearAboutUs },
       { name: "promocode", value: form.promocode?.value },
-      { name: "consent", value: form.consent?.checked ? "on" : "" },
+      { name: "consent", value: consentChecked ? "on" : "" },
     ];
     requiredFields.forEach(({ name, value }) => {
       const err = validateField(name, value);
@@ -275,7 +273,6 @@ export default function RegistrationForm() {
     formData.append("mobile", mobile);
     formData.append("country", countryName);
     formData.append("mainObjective", mainObjective);
-    formData.append("hearAboutUs", hearAboutUs);
     formData.append("prefix", prefix);
     formData.append("promocode", form.promocode?.value || "");
     formData.append("captchaToken", hcaptchaToken);
@@ -292,7 +289,7 @@ export default function RegistrationForm() {
       setFormMessage("");
       setFormMessageType("");
       setMainObjective("");
-      setHearAboutUs("");
+      setConsentChecked(false);
       setPrefix("Mr.");
     } else {
       setFormMessage(result.message);
@@ -572,83 +569,36 @@ export default function RegistrationForm() {
                       </div>
                     </div>
 
-                    {/* Main Objective & How did you hear Dropdowns */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-1">
-                        <label
-                          htmlFor="mainObjective-select"
-                          className="block text-white mb-1 font-medium"
-                        >
-                          Main Objective for registering at AIMCS AFRICA{" "}
-                          <span className="text-red-500">*</span>
-                        </label>
-                        <CustomSelect
-                          id="mainObjective-select"
-                          name="mainObjective"
-                          value={mainObjective}
-                          onChange={setMainObjective}
-                          options={[
-                            { value: "Asset Integrity", label: "Asset Integrity" },
-                            { value: "Process Safety", label: "Process Safety" },
-                            {
-                              value: "Digital Transformation",
-                              label: "Digital Transformation",
-                            },
-                          ]}
-                          placeholder="Select your main objective"
-                          hasError={submitted && !!errors.mainObjective}
-                        />
-                        {submitted && errors.mainObjective && (
-                          <p className="text-red-500 text-xs pt-1">
-                            {errors.mainObjective}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="space-y-1">
-                        <label
-                          htmlFor="hearAboutUs-select"
-                          className="block text-white mb-1 font-medium"
-                        >
-                          How did you hear about us?{" "}
-                          <span className="text-red-500">*</span>
-                        </label>
-                        <CustomSelect
-                          id="hearAboutUs-select"
-                          name="hearAboutUs"
-                          value={hearAboutUs}
-                          onChange={setHearAboutUs}
-                          options={[
-                            { value: "Google Ads", label: "Google Ads" },
-                            {
-                              value: "Industry Colleague/Word of Mouth",
-                              label: "Industry Colleague/Word of Mouth",
-                            },
-                            {
-                              value: "Industry Magazine/Publication",
-                              label: "Industry Magazine/Publication",
-                            },
-                            { value: "Newsletter", label: "Newsletter" },
-                            {
-                              value: "Previous Event Attendance",
-                              label: "Previous Event Attendance",
-                            },
-                            {
-                              value: "Search Engine (Google, Bing, etc.)",
-                              label: "Search Engine (Google, Bing, etc.)",
-                            },
-                            { value: "Social Media", label: "Social Media" },
-                            { value: "Other", label: "Other" },
-                          ]}
-                          placeholder="Select how you heard about us"
-                          hasError={submitted && !!errors.hearAboutUs}
-                        />
-                        {submitted && errors.hearAboutUs && (
-                          <p className="text-red-500 text-xs pt-1">
-                            {errors.hearAboutUs}
-                          </p>
-                        )}
-                      </div>
+                    {/* Main Objective — dropdown, full width */}
+                    <div className="space-y-1">
+                      <label
+                        htmlFor="mainObjective-select"
+                        className="block text-white mb-1 font-medium"
+                      >
+                        Main Objective for registering at AIMCS AFRICA{" "}
+                        <span className="text-red-500">*</span>
+                      </label>
+                      <CustomSelect
+                        id="mainObjective-select"
+                        name="mainObjective"
+                        value={mainObjective}
+                        onChange={setMainObjective}
+                        options={[
+                          { value: "Asset Integrity", label: "Asset Integrity" },
+                          { value: "Process Safety", label: "Process Safety" },
+                          {
+                            value: "Digital Transformation",
+                            label: "Digital Transformation",
+                          },
+                        ]}
+                        placeholder="Select your main objective"
+                        hasError={submitted && !!errors.mainObjective}
+                      />
+                      {submitted && errors.mainObjective && (
+                        <p className="text-red-500 text-xs pt-1">
+                          {errors.mainObjective}
+                        </p>
+                      )}
                     </div>
 
                     {/* Promocode Field */}
@@ -674,34 +624,72 @@ export default function RegistrationForm() {
                       )}
                     </div>
 
-                    {/* Consent Section */}
-                    <div className="space-y-3">
+                    {/* Consent Section — modern custom checkbox */}
+                    <div className="space-y-2">
                       <label className="block text-white mb-1 font-medium">
                         Consent <span className="text-red-500">*</span>
                       </label>
-                      <div className="flex items-start space-x-2">
+
+                      <label
+                        htmlFor="consent"
+                        className="flex items-start gap-3 cursor-pointer group"
+                      >
+                        {/* Hidden native checkbox */}
                         <input
                           type="checkbox"
                           id="consent"
                           name="consent"
-                          className="w-5 h-5 cursor-pointer text-blue-600 bg-gray-100 border-gray-300 rounded mt-1"
+                          checked={consentChecked}
+                          onChange={(e) => setConsentChecked(e.target.checked)}
+                          className="sr-only"
                         />
-                        <div className="text-sm text-white leading-relaxed">
-                          <label htmlFor="consent">
-                            By submitting this form, you agree to the processing
-                            of your personal data by Aldrich as described in the{" "}
-                            <a
-                              href="https://aldrichme.com/en/privacy-policy.html"
-                              className="text-blue-600 underline"
-                            >
-                              privacy policy
-                            </a>
-                          </label>
-                          .
+
+                        {/* Custom checkbox box */}
+                        <div
+                          className={`relative flex-shrink-0 w-6 h-6 mt-0.5 rounded-md border-2 transition-all duration-200 shadow-inner ${
+                            consentChecked
+                              ? "bg-[#22c55e] border-[#22c55e]"
+                              : "bg-slate-800/60 border-slate-500 group-hover:border-[#22c55e]/70"
+                          }`}
+                        >
+                          {/* Tick SVG — shown when checked */}
+                          <svg
+                            className={`absolute inset-0 w-full h-full p-0.5 text-white transition-opacity duration-150 ${
+                              consentChecked ? "opacity-100" : "opacity-0"
+                            }`}
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={3}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M5 13l4 4L19 7" />
+                          </svg>
                         </div>
-                      </div>
+
+                        {/* Consent text */}
+                        <span className="text-sm text-slate-200 leading-relaxed">
+                          By submitting this form, you agree to the processing of
+                          your personal data by Aldrich as described in the{" "}
+                          <a
+                            href="https://aldrichme.com/en/privacy-policy.html"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[#22c55e] underline underline-offset-2 hover:text-[#4ade80] transition-colors duration-150"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            privacy policy
+                          </a>
+                          .
+                        </span>
+                      </label>
+
                       {submitted && errors.consent && (
-                        <p className="text-red-500 text-xs pt-1">
+                        <p className="text-red-500 text-xs pt-1 flex items-center gap-1">
+                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
                           {errors.consent}
                         </p>
                       )}
