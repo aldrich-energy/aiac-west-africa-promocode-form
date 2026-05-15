@@ -300,7 +300,7 @@ export default function RegistrationForm() {
   const closeSuccessPopup = () => setShowSuccessPopup(false);
 
   return (
-    <div className="min-h-screen bg-[#0A343D] py-6 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-transparent py-6 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-center items-center min-h-[calc(100vh-4rem)]">
           <div className="w-full max-w-3xl">

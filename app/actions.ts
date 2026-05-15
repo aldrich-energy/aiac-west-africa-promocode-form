@@ -166,9 +166,16 @@ async function sendToFirestore(
       }),
     })
 
-    return response.ok
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`[Firestore Error] Failed to save to ${collection}: Status ${response.status}`, errorText)
+      return false
+    }
+
+    console.log(`[Firestore Success] Saved to collection: ${collection}`)
+    return true
   } catch (error) {
-    console.error("Firestore error:", error)
+    console.error(`[Firestore Exception] Error saving to ${collection}:`, error)
     return false
   }
 }
@@ -292,26 +299,50 @@ export async function submitRegistration(prevState: FormState, formData: FormDat
     // Update promocode to mark as used
     await updatePromocodeAsUsed(promoData.id, companyName)
 
+    // Store delegate user in Firestore Users collection
+    const delegateUserData = {
+      username: { stringValue: username },
+      companyname: { stringValue: companyName },
+      designation: { stringValue: jobTitle },
+      email: { stringValue: email },
+      mobile: { stringValue: mobile },
+      password: { stringValue: password },
+      linkedin: { stringValue: "" },
+      profileImage: { stringValue: "" },
+      userType: { integerValue: 4 },
+      country: { stringValue: country || "" },
+      mainObjective: { stringValue: mainObjective },
+      hearAboutUs: { stringValue: hearAboutUs || "" },
+      eventYear: { stringValue: "2026" },
+      timestamp: { timestampValue: new Date().toISOString() },
+    }
+
+    console.log("Attempting to save to Users collection...")
+    const usersSaveResult = await sendToFirestore("Users", delegateUserData)
+    console.log("Users save result:", usersSaveResult)
+
     // Store data in 'delegates' collection as requested
-    // Mapping from form to delegates schema shown in screenshot
+    console.log("Attempting to save to delegates collection...")
     const delegateData = {
-      bio: { nullValue: null },
-      companyImage: { nullValue: null },
+      bio: { stringValue: "" },
+      companyImage: { stringValue: "" },
       createdAt: { stringValue: formattedDate },
       dateCreated: { stringValue: formattedDate },
       designation: { stringValue: jobTitle },
+      company: { stringValue: companyName },
       email: { stringValue: email },
       eventYear: { stringValue: "2026" },
-      exhibitorId: { nullValue: null },
-      imageUrl: { nullValue: null },
-      linkedin: { nullValue: null },
+      exhibitorId: { stringValue: "" },
+      imageUrl: { stringValue: "" },
+      linkedin: { stringValue: "" },
       mobile: { stringValue: mobile },
       name: { stringValue: username.toUpperCase() },
       registrationType: { stringValue: "Delegate" },
       userId: { stringValue: generatedUserId },
     }
 
-    await sendToFirestore("delegates", delegateData)
+    const delegatesSaveResult = await sendToFirestore("delegates", delegateData)
+    console.log("Delegates save result:", delegatesSaveResult)
 
     // Send delegate email (template ID 13)
     await sendBrevoEmail(
