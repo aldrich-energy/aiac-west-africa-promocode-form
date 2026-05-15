@@ -150,7 +150,7 @@ async function updatePromocodeAsUsed(docId: string, companyName: string): Promis
 // Send data to Firestore using REST API
 async function sendToFirestore(
   collection: string,
-  data: Record<string, { stringValue?: string; timestampValue?: string; booleanValue?: boolean; integerValue?: number }>
+  data: Record<string, { stringValue?: string; timestampValue?: string; booleanValue?: boolean; integerValue?: number; nullValue?: null }>
 ): Promise<boolean> {
   const projectId = process.env.FIREBASE_PROJECT_ID
   const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/${collection}`
@@ -248,6 +248,13 @@ export async function submitRegistration(prevState: FormState, formData: FormDat
     // Prepare user data
     const username = `${firstName} ${lastName}`.trim()
     const password = `${email.split("@")[0]}@${Math.floor(Math.random() * 9000) + 1000}`
+    
+    // Generate a unique userId (20 chars like in screenshot)
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    let generatedUserId = ''
+    for (let i = 0; i < 20; i++) {
+      generatedUserId += characters.charAt(Math.floor(Math.random() * characters.length))
+    }
 
     // Create formatted datetime for delegates collection
     const timezone = 'Asia/Dubai' // UTC+4
@@ -285,79 +292,39 @@ export async function submitRegistration(prevState: FormState, formData: FormDat
     // Update promocode to mark as used
     await updatePromocodeAsUsed(promoData.id, companyName)
 
-    // Store delegate user in Firestore Users collection
-    const delegateUserData = {
-      username: { stringValue: username },
-      companyname: { stringValue: companyName },
-      designation: { stringValue: jobTitle },
-      email: { stringValue: email },
-      mobile: { stringValue: mobile },
-      password: { stringValue: password },
-      linkedin: { stringValue: "" },
-      profileImage: { stringValue: "" },
-      userType: { integerValue: 16 },
-      country: { stringValue: country || "" },
-      mainObjective: { stringValue: mainObjective },
-      hearAboutUs: { stringValue: hearAboutUs },
-      promocode: { stringValue: promocode },
-      eventYear: { stringValue: "2026" },
-      timestamp: { timestampValue: new Date().toISOString() },
-    }
-
-    await sendToFirestore("Users", delegateUserData)
-
-    // Store delegate info in Firestore delegates collection
+    // Store data in 'delegates' collection as requested
+    // Mapping from form to delegates schema shown in screenshot
     const delegateData = {
-      bio: { stringValue: "" },
-      companyImage: { stringValue: "" },
+      bio: { nullValue: null },
+      companyImage: { nullValue: null },
       createdAt: { stringValue: formattedDate },
+      dateCreated: { stringValue: formattedDate },
       designation: { stringValue: jobTitle },
-      company: { stringValue: companyName },
       email: { stringValue: email },
-      exhibitorId: { stringValue: "" },
-      imageUrl: { stringValue: "" },
-      linkedin: { stringValue: "" },
+      eventYear: { stringValue: "2026" },
+      exhibitorId: { nullValue: null },
+      imageUrl: { nullValue: null },
+      linkedin: { nullValue: null },
       mobile: { stringValue: mobile },
-      name: { stringValue: username },
-      userType: { stringValue: "VIP Visitor" },
-      userId: { stringValue: "" },
-      promocode: { stringValue: promocode },
+      name: { stringValue: username.toUpperCase() },
+      registrationType: { stringValue: "Delegate" },
+      userId: { stringValue: generatedUserId },
     }
 
-    await sendToFirestore("other_members", delegateData)
+    await sendToFirestore("delegates", delegateData)
 
-    // Send data to MongoDB delegates collection — disabled, not needed currently
-    // const mongoDelegateDataWithPromo = {
-    //   createdAt: formattedDate,
-    //   designation: jobTitle,
-    //   email: email,
-    //   mobile: mobile,
-    //   name: username,
-    //   registrationType: "VIP Visitor",
-    //   prefix: prefix,
-    //   firstName: firstName,
-    //   lastName: lastName,
-    //   companyName: companyName,
-    //   country: country || "",
-    //   mainObjective: mainObjective,
-    //   hearAboutUs: hearAboutUs,
-    //   promocode: promocode,
-    //   createdAtMongo: new Date(),
-    // }
-    // await sendToMongoDB("VIPVisitors", mongoDelegateDataWithPromo)
-
-    // Send delegate email (template ID 12)
+    // Send delegate email (template ID 13)
     await sendBrevoEmail(
       {
         email,
         password,
         name: username,
-        usertype: "VIP Visitor",
+        usertype: "Delegate",
         companyname: companyName,
-        mobile:mobile,
+        mobile: mobile,
         designation: jobTitle,
       },
-      13,
+      19,
     )
 
     return { message: "Registration successful!", errors: {} }

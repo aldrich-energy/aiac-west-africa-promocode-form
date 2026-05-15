@@ -615,7 +615,7 @@ export default function RegistrationForm() {
                         type="text"
                         className="w-full bg-slate-950/30 border-0 border-b-2 border-slate-600 rounded-[12px] focus:border-[#22c55e] px-0 shadow-none focus:outline-none focus:ring-0 py-2 text-slate-100 placeholder:text-slate-500"
                         placeholder="Enter promocode"
-                        maxLength={16}
+                        maxLength={8}
                       />
                       {submitted && errors.promocode && (
                         <p className="text-rose-400 text-xs pt-1">
@@ -732,13 +732,13 @@ export default function RegistrationForm() {
 
       {/* Success Popup Modal */}
       {showSuccessPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-200 rounded-lg shadow-xl max-w-md w-full mx-4 transform transition-all">
-            <div className="p-6">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-[#0A343D] rounded-2xl shadow-2xl max-w-md w-full mx-4 transform transition-all border border-emerald-900/30">
+            <div className="p-8">
               {/* Success Icon */}
-              <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full">
+              <div className="flex items-center justify-center w-20 h-20 mx-auto mb-6 bg-emerald-500/10 rounded-full border-2 border-emerald-500/20">
                 <svg
-                  className="w-8 h-8 text-green-600"
+                  className="w-10 h-10 text-[#22c55e]"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -747,20 +747,20 @@ export default function RegistrationForm() {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth="2"
+                    strokeWidth="3"
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
               </div>
 
               {/* Success Message */}
-              <div className="text-center mb-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              <div className="text-center mb-8">
+                <h3 className="text-2xl font-bold text-white mb-3">
                   Registration Successful!
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-emerald-100/70 leading-relaxed">
                   Thank you for registering. Your submission has been received
-                  successfully.
+                  successfully. We have sent a confirmation email to you.
                 </p>
               </div>
 
@@ -768,7 +768,7 @@ export default function RegistrationForm() {
               <div className="space-y-3">
                 <button
                   onClick={closeSuccessPopup}
-                  className="w-full bg-gray-100 cursor-pointer hover:bg-gray-200 text-gray-800 py-3 px-4 rounded-lg font-medium transition-colors"
+                  className="w-full bg-[#22c55e] hover:bg-[#1f9a51] text-white py-4 px-4 rounded-xl font-bold text-lg transition-all duration-200 shadow-lg shadow-emerald-900/40 cursor-pointer"
                 >
                   Close
                 </button>
