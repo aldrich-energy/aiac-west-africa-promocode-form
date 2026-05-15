@@ -160,8 +160,29 @@
     cursor: pointer !important;
   }
 
+  /* Inputs that must NOT get global input styles */
+  .registration-form input[type="hidden"],
+  .registration-form input[readonly] {
+    background-color: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
 
-}
+  /* Country flag button — keep transparent, no border */
+  .registration-form .country-flag-btn {
+    background-color: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 14px !important;
+    height: 100% !important;
+  }
+
+
+
+} /* end @layer base */
 
 .react-international-phone-input-container .react-international-phone-input {
   --react-international-phone-height: 100%;
@@ -188,6 +209,22 @@
 .react-international-phone-country-selector-button {
   --react-international-phone-country-selector-border-color: white;
 }
+
+/* Custom select dropdown scrollbar */
+.custom-select-list::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-select-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-select-list::-webkit-scrollbar-thumb {
+  background: rgba(71, 85, 105, 0.6);
+  border-radius: 2px;
+}
+
+
+
+
 
 
 

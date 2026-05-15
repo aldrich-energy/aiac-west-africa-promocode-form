@@ -1,48 +1,46 @@
 "use server"
 
-import { MongoClient } from 'mongodb'
+// import { MongoClient } from 'mongodb'
 
 interface FormState {
   message: string
   errors: Record<string, string>
 }
 
-// MongoDB connection function
-async function connectToMongoDB() {
-  const uri = process.env.MONGODB_URI
-  if (!uri) {
-    throw new Error('MONGODB_URI environment variable is not set')
-  }
-  
-  const client = new MongoClient(uri)
-  try {
-    await client.connect()
-    return client
-  } catch (error) {
-    console.error('MongoDB connection error:', error)
-    throw error
-  }
-}
+// MongoDB connection function — disabled, not needed currently
+// async function connectToMongoDB() {
+//   const uri = process.env.MONGODB_URI
+//   if (!uri) {
+//     throw new Error('MONGODB_URI environment variable is not set')
+//   }
+//   const client = new MongoClient(uri)
+//   try {
+//     await client.connect()
+//     return client
+//   } catch (error) {
+//     console.error('MongoDB connection error:', error)
+//     throw error
+//   }
+// }
 
-// Send data to MongoDB
-async function sendToMongoDB(collection: string, data: Record<string, unknown>): Promise<boolean> {
-  let client: MongoClient | null = null
-  try {
-    client = await connectToMongoDB()
-    const database = client.db()
-    const dbCollection = database.collection(collection)
-    
-    await dbCollection.insertOne(data)
-    return true
-  } catch (error) {
-    console.error('MongoDB error:', error)
-    return false
-  } finally {
-    if (client) {
-      await client.close()
-    }
-  }
-}
+// Send data to MongoDB — disabled, not needed currently
+// async function sendToMongoDB(collection: string, data: Record<string, unknown>): Promise<boolean> {
+//   let client: MongoClient | null = null
+//   try {
+//     client = await connectToMongoDB()
+//     const database = client.db()
+//     const dbCollection = database.collection(collection)
+//     await dbCollection.insertOne(data)
+//     return true
+//   } catch (error) {
+//     console.error('MongoDB error:', error)
+//     return false
+//   } finally {
+//     if (client) {
+//       await client.close()
+//     }
+//   }
+// }
 
 // XOR encryption function (matching your PHP code)
 function xorEncrypt(text: string, key: string): string {
@@ -329,26 +327,25 @@ export async function submitRegistration(prevState: FormState, formData: FormDat
 
     await sendToFirestore("other_members", delegateData)
 
-    // Send data to MongoDB delegates collection
-    const mongoDelegateDataWithPromo = {
-      createdAt: formattedDate,
-      designation: jobTitle,
-      email: email,
-      mobile: mobile,
-      name: username,
-      registrationType: "VIP Visitor",
-      prefix: prefix,
-      firstName: firstName,
-      lastName: lastName,
-      companyName: companyName,
-      country: country || "",
-      mainObjective: mainObjective,
-      hearAboutUs: hearAboutUs,
-      promocode: promocode,
-      createdAtMongo: new Date(),
-    }
-
-    await sendToMongoDB("VIPVisitors", mongoDelegateDataWithPromo)
+    // Send data to MongoDB delegates collection — disabled, not needed currently
+    // const mongoDelegateDataWithPromo = {
+    //   createdAt: formattedDate,
+    //   designation: jobTitle,
+    //   email: email,
+    //   mobile: mobile,
+    //   name: username,
+    //   registrationType: "VIP Visitor",
+    //   prefix: prefix,
+    //   firstName: firstName,
+    //   lastName: lastName,
+    //   companyName: companyName,
+    //   country: country || "",
+    //   mainObjective: mainObjective,
+    //   hearAboutUs: hearAboutUs,
+    //   promocode: promocode,
+    //   createdAtMongo: new Date(),
+    // }
+    // await sendToMongoDB("VIPVisitors", mongoDelegateDataWithPromo)
 
     // Send delegate email (template ID 12)
     await sendBrevoEmail(

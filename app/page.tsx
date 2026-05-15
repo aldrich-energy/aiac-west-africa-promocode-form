@@ -1,13 +1,11 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { PhoneInput, CountrySelector } from "react-international-phone";
 import { submitRegistration } from "./actions";
 import "react-international-phone/style.css";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { PhoneNumberUtil } from "google-libphonenumber";
-// import HeaderImg from "@/public/images/banner.png";
-// import Image from "next/image";
 
 interface FormState {
   message: string;
@@ -28,13 +26,165 @@ const isPhoneValid = (phone: string) => {
   }
 };
 
+// ─── Custom Select Component ────────────────────────────────────────────────
+interface CustomSelectProps {
+  id?: string;
+  name: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: { value: string; label: string }[];
+  placeholder?: string;
+  hasError?: boolean;
+}
+
+function CustomSelect({
+  id,
+  name,
+  value,
+  onChange,
+  options,
+  placeholder = "Select an option",
+  hasError,
+}: CustomSelectProps) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const selected = options.find((o) => o.value === value);
+
+  return (
+    <div ref={ref} className="relative w-full">
+      {/* Hidden native input for form submission */}
+      <input type="hidden" name={name} value={value} />
+
+      {/* Trigger button — exact same look as other form inputs */}
+      <button
+        type="button"
+        id={id}
+        onClick={() => setOpen((p) => !p)}
+        style={{
+          backgroundColor: "rgba(15, 23, 42, 0.24)",
+          color: "#f8fafc",
+          border: hasError
+            ? "1px solid rgb(239, 68, 68)"
+            : "1px solid rgba(148, 163, 184, 0.25)",
+          borderRadius: "12px",
+          boxShadow: "inset 0 1px 2px rgba(15, 23, 42, 0.35)",
+          padding: "0.75rem 1rem",
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "8px",
+          cursor: "pointer",
+          outline: "none",
+          transition: "border-color 0.2s",
+          fontSize: "1rem",
+          textAlign: "left",
+        }}
+        onFocus={(e) =>
+          (e.currentTarget.style.border = "1px solid #22c55e")
+        }
+        onBlur={(e) =>
+          (e.currentTarget.style.border = hasError
+            ? "1px solid rgb(239, 68, 68)"
+            : "1px solid rgba(148, 163, 184, 0.25)")
+        }
+      >
+        <span style={{ color: selected ? "#f8fafc" : "#94a3b8" }}>
+          {selected ? selected.label : placeholder}
+        </span>
+        <svg
+          style={{
+            width: "16px",
+            height: "16px",
+            color: "#94a3b8",
+            flexShrink: 0,
+            transform: open ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform 0.2s",
+          }}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {/* Dropdown panel */}
+      {open && (
+        <div
+          style={{
+            position: "absolute",
+            zIndex: 50,
+            marginTop: "4px",
+            width: "100%",
+            backgroundColor: "#1a2535",
+            border: "1px solid rgba(148, 163, 184, 0.25)",
+            borderRadius: "12px",
+            boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
+            overflow: "hidden",
+          }}
+        >
+          <ul
+            className="custom-select-list"
+            style={{ maxHeight: "208px", overflowY: "auto", padding: "4px 0" }}
+          >
+            {options.map((opt) => (
+              <li
+                key={opt.value}
+                onClick={() => {
+                  onChange(opt.value);
+                  setOpen(false);
+                }}
+                style={{
+                  padding: "10px 16px",
+                  fontSize: "0.875rem",
+                  cursor: "pointer",
+                  color: value === opt.value ? "#22c55e" : "#e2e8f0",
+                  backgroundColor:
+                    value === opt.value
+                      ? "rgba(34, 197, 94, 0.12)"
+                      : "transparent",
+                  fontWeight: value === opt.value ? 500 : 400,
+                  transition: "background-color 0.15s",
+                }}
+                onMouseEnter={(e) => {
+                  if (value !== opt.value)
+                    e.currentTarget.style.backgroundColor =
+                      "rgba(71, 85, 105, 0.5)";
+                }}
+                onMouseLeave={(e) => {
+                  if (value !== opt.value)
+                    e.currentTarget.style.backgroundColor = "transparent";
+                }}
+              >
+                {opt.label}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Main Form ───────────────────────────────────────────────────────────────
 export default function RegistrationForm() {
   const [state, setState] = useState<FormState>({ message: "", errors: {} });
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [country, setCountry] = useState<string>("ae");
-  const [countryName, setCountryName] = useState<string>(
-    "United Arab Emirates",
-  );
+  const [countryName, setCountryName] = useState<string>("United Arab Emirates");
   const [mobile, setMobile] = useState<string>("");
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitted, setSubmitted] = useState(false);
@@ -46,7 +196,12 @@ export default function RegistrationForm() {
     "" | "success" | "error" | "loading"
   >("");
 
-  // New state for success popup
+  // Custom select states
+  const [prefix, setPrefix] = useState<string>("Mr.");
+  const [mainObjective, setMainObjective] = useState<string>("");
+  const [hearAboutUs, setHearAboutUs] = useState<string>("");
+
+  // Success popup
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   // Validation function
@@ -66,23 +221,15 @@ export default function RegistrationForm() {
       return "This field is required";
     }
     if (name === "mobile") {
-      if (!value) {
-        return "This field is required";
-      }
-      if (!isPhoneValid(value)) {
-        return "Please enter a valid phone number";
-      }
+      if (!value) return "This field is required";
+      if (!isPhoneValid(value)) return "Please enter a valid phone number";
     }
     if (name === "consent" && !formRef.current?.consent?.checked) {
       return "You must agree to the privacy policy";
     }
     if (name === "promocode") {
-      if (!value) {
-        return "Promocode is required";
-      }
-      if (value.trim().length < 3) {
-        return "Please enter a valid promocode";
-      }
+      if (!value) return "Promocode is required";
+      if (value.trim().length < 3) return "Please enter a valid promocode";
     }
     return "";
   };
@@ -101,8 +248,8 @@ export default function RegistrationForm() {
       { name: "jobTitle", value: form.jobTitle?.value },
       { name: "email", value: form.email?.value },
       { name: "mobile", value: mobile },
-      { name: "mainObjective", value: form.mainObjective?.value },
-      { name: "hearAboutUs", value: form.hearAboutUs?.value },
+      { name: "mainObjective", value: mainObjective },
+      { name: "hearAboutUs", value: hearAboutUs },
       { name: "promocode", value: form.promocode?.value },
       { name: "consent", value: form.consent?.checked ? "on" : "" },
     ];
@@ -127,6 +274,9 @@ export default function RegistrationForm() {
     const formData = new FormData(form);
     formData.append("mobile", mobile);
     formData.append("country", countryName);
+    formData.append("mainObjective", mainObjective);
+    formData.append("hearAboutUs", hearAboutUs);
+    formData.append("prefix", prefix);
     formData.append("promocode", form.promocode?.value || "");
     formData.append("captchaToken", hcaptchaToken);
 
@@ -134,29 +284,23 @@ export default function RegistrationForm() {
     setState(result);
     setIsSubmitting(false);
     if (result.message.includes("success")) {
-      // Show success popup instead of form message
       setShowSuccessPopup(true);
-      if (formRef.current) {
-        formRef.current.reset();
-      }
+      if (formRef.current) formRef.current.reset();
       setMobile("");
       setHcaptchaToken("");
       setErrors({});
       setFormMessage("");
       setFormMessageType("");
+      setMainObjective("");
+      setHearAboutUs("");
+      setPrefix("Mr.");
     } else {
       setFormMessage(result.message);
       setFormMessageType("error");
-      // if (result.errors?.promocode) {
-      //   setErrors((prev) => ({ ...prev, promocode: result.errors.promocode }));
-      //   setTouched((prev) => ({ ...prev, promocode: true }));
-      // }
     }
   };
 
-  const closeSuccessPopup = () => {
-    setShowSuccessPopup(false);
-  };
+  const closeSuccessPopup = () => setShowSuccessPopup(false);
 
   return (
     <div className="min-h-screen bg-transparent py-6 px-4 sm:px-6 lg:px-8">
@@ -164,9 +308,7 @@ export default function RegistrationForm() {
         <div className="flex justify-center items-center min-h-[calc(100vh-4rem)]">
           <div className="w-full max-w-3xl">
             <div className="space-y-4">
-              <div
-                className="bg-slate-900/70 border border-white/10 shadow-2xl rounded-[32px] flex flex-col justify-center h-full backdrop-blur-xl"
-              >
+              <div className="bg-slate-900/70 border border-white/10 shadow-2xl rounded-[32px] flex flex-col justify-center h-full backdrop-blur-xl">
                 <div className="p-8">
                   <form
                     ref={formRef}
@@ -195,22 +337,25 @@ export default function RegistrationForm() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-1">
                         <label
-                          htmlFor="prefix"
+                          htmlFor="prefix-select"
                           className="block text-white mb-1 font-medium"
                         >
                           Prefix
                         </label>
-                        <select
+                        <CustomSelect
+                          id="prefix-select"
                           name="prefix"
-                          defaultValue="Mr."
-                          className="w-full bg-transparent border-0 border-b-2 border-slate-600 rounded-[12px] focus:border-[#22c55e] shadow-none focus:outline-none focus:ring-0 py-2 text-slate-100"
-                        >
-                          <option value="Mr.">Mr.</option>
-                          <option value="Mrs.">Mrs.</option>
-                          <option value="Ms.">Ms.</option>
-                          <option value="Dr.">Dr.</option>
-                          <option value="Prof.">Prof.</option>
-                        </select>
+                          value={prefix}
+                          onChange={setPrefix}
+                          options={[
+                            { value: "Mr.", label: "Mr." },
+                            { value: "Mrs.", label: "Mrs." },
+                            { value: "Ms.", label: "Ms." },
+                            { value: "Dr.", label: "Dr." },
+                            { value: "Prof.", label: "Prof." },
+                          ]}
+                          placeholder="Prefix"
+                        />
                       </div>
 
                       <div className="md:col-span-2 space-y-1">
@@ -349,32 +494,74 @@ export default function RegistrationForm() {
                           </p>
                         )}
                       </div>
+
+                      {/* Country — exact same visual footprint as phone input */}
                       <div className="space-y-1">
                         <label className="block text-white mb-1 font-medium">
                           Country
                         </label>
-                        <div className="w-full border-slate-600 rounded-[12px] focus-within:border-[#22c55e] px-0 shadow-none focus-within:outline-none focus-within:ring-0 py-2 flex items-center">
-                          <CountrySelector
-                            selectedCountry={country}
-                            onSelect={({
-                              iso2,
-                              name,
-                            }: {
-                              iso2: string;
-                              name: string;
-                            }) => {
-                              setCountry(iso2);
-                              setCountryName(name);
+                        {/* Wrapper uses exact same inline styles as the inputs */}
+                        <div
+                          style={{
+                            backgroundColor: "rgba(15, 23, 42, 0.24)",
+                            border: "1px solid rgba(148, 163, 184, 0.25)",
+                            borderRadius: "12px",
+                            boxShadow: "inset 0 1px 2px rgba(15, 23, 42, 0.35)",
+                            display: "flex",
+                            alignItems: "stretch",
+                            width: "100%",
+                            height: "51px",
+                          }}
+                        >
+                          {/* Flag selector — same height as wrapper */}
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              height: "100%",
                             }}
-                            buttonClassName="bg-transparent border-0 shadow-none focus:outline-none text-slate-100"
-                          />
+                          >
+                            <CountrySelector
+                              selectedCountry={country}
+                              onSelect={({
+                                iso2,
+                                name,
+                              }: {
+                                iso2: string;
+                                name: string;
+                              }) => {
+                                setCountry(iso2);
+                                setCountryName(name);
+                              }}
+                              buttonClassName="country-flag-btn bg-transparent border-0 shadow-none focus:outline-none text-slate-100"
+                              buttonStyle={{
+                                height: "100%",
+                                padding: "0 14px",
+                                background: "transparent",
+                                border: "none",
+                                boxShadow: "none",
+                                outline: "none",
+                              }}
+                            />
+                          </div>
+                          {/* Country name text */}
                           <input
                             id="country"
                             type="text"
                             value={countryName}
                             readOnly
                             placeholder="Select country"
-                            className="flex-1 bg-transparent border-0 outline-none text-slate-100 placeholder:text-slate-500 px-0"
+                            style={{
+                              flex: 1,
+                              background: "transparent",
+                              border: "none",
+                              outline: "none",
+                              color: "#f8fafc",
+                              fontSize: "1rem",
+                              cursor: "default",
+                              padding: "0",
+                              boxShadow: "none",
+                            }}
                           />
                         </div>
                         {submitted && errors.country && (
@@ -385,33 +572,32 @@ export default function RegistrationForm() {
                       </div>
                     </div>
 
-                    {/* Main Objective Dropdown */}
+                    {/* Main Objective & How did you hear Dropdowns */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1">
                         <label
-                          htmlFor="mainObjective"
+                          htmlFor="mainObjective-select"
                           className="block text-white mb-1 font-medium"
                         >
                           Main Objective for registering at AIMCS AFRICA{" "}
                           <span className="text-red-500">*</span>
                         </label>
-                        <select
-                          id="mainObjective"
+                        <CustomSelect
+                          id="mainObjective-select"
                           name="mainObjective"
-                          className="w-full bg-transparent border-0 border-b-2 border-slate-600 rounded-[12px] focus:border-[#22c55e] shadow-none focus:outline-none cursor-pointer focus:ring-0 py-2 text-slate-100"
-                          defaultValue=""
-                        >
-                          <option value="" disabled>
-                            Select your main objective
-                          </option>
-                          <option value="Asset Integrity">
-                            Asset Integrity
-                          </option>
-                          <option value="Process Safety">Process Safety</option>
-                          <option value="Digital Transformation">
-                            Digital Transformation
-                          </option>
-                        </select>
+                          value={mainObjective}
+                          onChange={setMainObjective}
+                          options={[
+                            { value: "Asset Integrity", label: "Asset Integrity" },
+                            { value: "Process Safety", label: "Process Safety" },
+                            {
+                              value: "Digital Transformation",
+                              label: "Digital Transformation",
+                            },
+                          ]}
+                          placeholder="Select your main objective"
+                          hasError={submitted && !!errors.mainObjective}
+                        />
                         {submitted && errors.mainObjective && (
                           <p className="text-red-500 text-xs pt-1">
                             {errors.mainObjective}
@@ -419,50 +605,44 @@ export default function RegistrationForm() {
                         )}
                       </div>
 
-                      {/* How did you hear about us Dropdown */}
                       <div className="space-y-1">
                         <label
-                          htmlFor="hearAboutUs"
+                          htmlFor="hearAboutUs-select"
                           className="block text-white mb-1 font-medium"
                         >
                           How did you hear about us?{" "}
                           <span className="text-red-500">*</span>
                         </label>
-                        <select
-                          id="hearAboutUs"
+                        <CustomSelect
+                          id="hearAboutUs-select"
                           name="hearAboutUs"
-                          className="w-full bg-transparent border-0 border-b-2 border-slate-600 rounded-[12px] focus:border-[#22c55e] shadow-none focus:outline-none cursor-pointer focus:ring-0 py-2 text-slate-100"
-                          defaultValue=""
-                        >
-                          <option value="" disabled>
-                            Select how you heard about us
-                          </option>
-                          <option value="Google Ads">Google Ads</option>
-                          <option value="Industry Colleague/Word of Mouth">
-                            Industry Colleague/Word of Mouth
-                          </option>
-                          <option value="Industry Magazine/Publication">
-                            Industry Magazine/Publication
-                          </option>
-                          <option value="Newsletter">Newsletter</option>
-                          <option value="Previous Event Attendance">
-                            Previous Event Attendance
-                          </option>
-                          <option value="Search Engine (Google, Bing, etc.)">
-                            Search Engine (Google, Bing, etc.)
-                          </option>
-                          <option value="Social Media">Social Media</option>
-                          <option value="Other">Other</option>
-                          {/* <option value="Social Media">Social Media</option>
-                          <option value="Website">Website</option>
-                          <option value="Newsletter">Newsletter</option>
-                          <option value="Press & Media Partner">
-                            Press & Media Partner
-                          </option>
-                          <option value="Friend Refers">Friend Refers</option>
-                          <option value="Direct Sales">Direct Sales</option>
-                          <option value="Direct Sales">Others</option> */}
-                        </select>
+                          value={hearAboutUs}
+                          onChange={setHearAboutUs}
+                          options={[
+                            { value: "Google Ads", label: "Google Ads" },
+                            {
+                              value: "Industry Colleague/Word of Mouth",
+                              label: "Industry Colleague/Word of Mouth",
+                            },
+                            {
+                              value: "Industry Magazine/Publication",
+                              label: "Industry Magazine/Publication",
+                            },
+                            { value: "Newsletter", label: "Newsletter" },
+                            {
+                              value: "Previous Event Attendance",
+                              label: "Previous Event Attendance",
+                            },
+                            {
+                              value: "Search Engine (Google, Bing, etc.)",
+                              label: "Search Engine (Google, Bing, etc.)",
+                            },
+                            { value: "Social Media", label: "Social Media" },
+                            { value: "Other", label: "Other" },
+                          ]}
+                          placeholder="Select how you heard about us"
+                          hasError={submitted && !!errors.hearAboutUs}
+                        />
                         {submitted && errors.hearAboutUs && (
                           <p className="text-red-500 text-xs pt-1">
                             {errors.hearAboutUs}
@@ -470,6 +650,7 @@ export default function RegistrationForm() {
                         )}
                       </div>
                     </div>
+
                     {/* Promocode Field */}
                     <div className="space-y-1">
                       <label
@@ -559,20 +740,6 @@ export default function RegistrationForm() {
             </div>
           </div>
         </div>
-
-        {/* <div className="grid grid-cols-1 lg:grid-cols-2 items-stretch">
-         
-          <div className="h-full flex items-stretch">
-            <div className="w-full h-full">
-              <Image
-                src={HeaderImg}
-                alt="AICC Caspian Conference Header"
-                className="w-full h-full object-cover rounded-l-lg rounded-tr-none rounded-br-none"
-              />
-            </div>
-          </div>
-         
-        </div> */}
       </div>
 
       {/* Success Popup Modal */}
@@ -609,27 +776,11 @@ export default function RegistrationForm() {
                 </p>
               </div>
 
-              {/* LinkedIn Share Button */}
+              {/* Close Button */}
               <div className="space-y-3">
-                {/* <button
-                  onClick={handleLinkedInShare}
-                  className="w-full bg-[#0077B5] cursor-pointer hover:bg-[#005885] text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-                  </svg>
-                  <span>Post on LinkedIn</span>
-                </button> */}
-
-                {/* Close Button */}
                 <button
                   onClick={closeSuccessPopup}
-                  className="w-full bg-gray-100 cursor-pointer hover:bg-gray-200 text-white py-3 px-4 rounded-lg font-medium transition-colors"
+                  className="w-full bg-gray-100 cursor-pointer hover:bg-gray-200 text-gray-800 py-3 px-4 rounded-lg font-medium transition-colors"
                 >
                   Close
                 </button>
