@@ -575,7 +575,7 @@ export default function RegistrationForm() {
                         htmlFor="mainObjective-select"
                         className="block text-white mb-1 font-medium"
                       >
-                        Main Objective for registering at AIMCS AFRICA{" "}
+                        Main Objective for registering at AIAC WEST AFRICA{" "}
                         <span className="text-red-500">*</span>
                       </label>
                       <CustomSelect
@@ -585,11 +585,7 @@ export default function RegistrationForm() {
                         onChange={setMainObjective}
                         options={[
                           { value: "Asset Integrity", label: "Asset Integrity" },
-                          { value: "Process Safety", label: "Process Safety" },
-                          {
-                            value: "Digital Transformation",
-                            label: "Digital Transformation",
-                          },
+                          { value: "Automation & Cybersecurity", label: "Automation & Cybersecurity" },
                         ]}
                         placeholder="Select your main objective"
                         hasError={submitted && !!errors.mainObjective}
