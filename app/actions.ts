@@ -180,6 +180,92 @@ async function sendToFirestore(
   }
 }
 
+// Get user from Firestore by email
+async function getUserByEmail(email: string): Promise<string | null> {
+  const projectId = process.env.FIREBASE_PROJECT_ID
+  const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:runQuery`
+  const normalizedEmail = email.toLowerCase().trim()
+
+  const body = {
+    structuredQuery: {
+      from: [{ collectionId: "Users" }],
+      where: {
+        fieldFilter: {
+          field: { fieldPath: "email" },
+          op: "EQUAL",
+          value: { stringValue: normalizedEmail }
+        }
+      },
+      limit: 1
+    }
+  }
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    })
+
+    const data = await response.json()
+    console.log(`[getUserByEmail] Query result for ${normalizedEmail}:`, JSON.stringify(data))
+
+    if (data && Array.isArray(data)) {
+      // runQuery returns an array of objects, one of which might contain the document
+      const foundEntry = data.find(item => item.document)
+      if (foundEntry && foundEntry.document) {
+        const docId = foundEntry.document.name.split("/").pop() || null
+        console.log(`[getUserByEmail] Found existing user ID: ${docId}`)
+        return docId
+      }
+    }
+
+    console.log(`[getUserByEmail] No existing user found for ${normalizedEmail}`)
+    return null
+  } catch (error) {
+    console.error(`[getUserByEmail] Exception checking email ${normalizedEmail}:`, error)
+    return null
+  }
+}    
+
+// Update data in Firestore using REST API
+async function updateFirestoreDocument(
+  collection: string,
+  docId: string,
+  data: Record<string, any>
+): Promise<boolean> {
+  const projectId = process.env.FIREBASE_PROJECT_ID
+  const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/${collection}/${docId}`
+
+  // Building the updateMask to ensure we update exactly the passed fields
+  const updateMaskStrings = Object.keys(data).map(key => `updateMask.fieldPaths=${key}`).join('&')
+  const completeUrl = `${url}?${updateMaskStrings}`
+
+  try {
+    const response = await fetch(completeUrl, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        fields: data,
+      }),
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`[Firestore Error] Failed to update ${collection}/${docId}: Status ${response.status}`, errorText)
+      return false
+    }
+
+    console.log(`[Firestore Success] Updated document in collection: ${collection}`)
+    return true
+  } catch (error) {
+    console.error(`[Firestore Exception] Error updating ${collection}/${docId}:`, error)
+    return false
+  }
+}
+
 // Send email via Brevo API
 async function sendBrevoEmail(data: Record<string, string>, templateId: number): Promise<boolean> {
   const plaintext = `${data.email},${data.name},${data.designation},${data.companyname},${data.mobile},${data.usertype},AIMCS AFRICA`
@@ -225,7 +311,8 @@ export async function submitRegistration(prevState: FormState, formData: FormDat
     const lastName = formData.get("lastName") as string
     const companyName = formData.get("companyName") as string
     const jobTitle = formData.get("jobTitle") as string
-    const email = formData.get("email") as string
+    const emailInput = formData.get("email") as string
+    const email = emailInput.toLowerCase().trim()
     const mobile = formData.get("mobile") as string
     const country = formData.get("country") as string
     const promocode = formData.get("promocode") as string
@@ -317,9 +404,18 @@ export async function submitRegistration(prevState: FormState, formData: FormDat
       timestamp: { timestampValue: new Date().toISOString() },
     }
 
-    console.log("Attempting to save to Users collection...")
-    const usersSaveResult = await sendToFirestore("Users", delegateUserData)
-    console.log("Users save result:", usersSaveResult)
+    console.log("Checking if user exists in Users collection by email...")
+    const existingUserId = await getUserByEmail(email)
+
+    if (existingUserId) {
+      console.log(`Existing user found with email ${email}, updating...`)
+      const usersUpdateResult = await updateFirestoreDocument("Users", existingUserId, delegateUserData)
+      console.log("Users update result:", usersUpdateResult)
+    } else {
+      console.log("No existing user found. Attempting to save new user to Users collection...")
+      const usersSaveResult = await sendToFirestore("Users", delegateUserData)
+      console.log("Users save result:", usersSaveResult)
+    }
 
     // Store data in 'delegates' collection as requested
     console.log("Attempting to save to delegates collection...")

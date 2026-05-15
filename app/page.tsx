@@ -300,13 +300,13 @@ export default function RegistrationForm() {
   const closeSuccessPopup = () => setShowSuccessPopup(false);
 
   return (
-    <div className="min-h-screen bg-transparent py-6 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-center items-center min-h-[calc(100vh-4rem)]">
-          <div className="w-full max-w-3xl">
+    <div className="bg-transparent">
+      <div className="w-full">
+        <div className="flex justify-center items-center min-h-screen">
+          <div className="w-full">
             <div className="space-y-4">
-              <div className="bg-slate-900/70 border border-white/10 shadow-2xl rounded-[32px] flex flex-col justify-center h-full backdrop-blur-xl">
-                <div className="p-8">
+              <div className="bg-slate-900/70 border-b border-white/10 shadow-2xl flex flex-col justify-center h-full backdrop-blur-xl">
+                <div className="p-4 sm:p-6 lg:p-8">
                   <form
                     ref={formRef}
                     onSubmit={handleSubmit}
