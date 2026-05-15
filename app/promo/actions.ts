@@ -166,8 +166,8 @@ export async function submitRegistration(prevState: FormState, formData: FormDat
     // Construct Email HTML Template
     const htmlTemplate = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
-        <h2 style="color: #22c55e; border-bottom: 2px solid #22c55e; padding-bottom: 10px;">New Promo Registration</h2>
-        <p>A new user has submitted the promo registration form. Here are the details:</p>
+        <h2 style="color: #22c55e; border-bottom: 2px solid #22c55e; padding-bottom: 10px;">New Promocode Registration</h2>
+        <p>A new user has submitted the promocode registration form. Here are the details:</p>
         <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
           <tr>
             <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; width: 35%;">Prefix</td>
@@ -219,7 +219,7 @@ export async function submitRegistration(prevState: FormState, formData: FormDat
     await transporter.sendMail({
       from: `"AIAC Registration" <${process.env.EMAIL}>`,
       to: "register@aiacafrica.com",
-      subject: `New Promo Registration: ${firstName} ${lastName} - ${companyName}`,
+      subject: `New Promocode Registration: ${firstName} ${lastName} - ${companyName}`,
       html: htmlTemplate,
     })
 
