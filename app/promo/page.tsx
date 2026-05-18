@@ -95,9 +95,9 @@ function CustomSelect({
           (e.currentTarget.style.border = "1px solid #22c55e")
         }
         onBlur={(e) =>
-          (e.currentTarget.style.border = hasError
-            ? "1px solid rgb(239, 68, 68)"
-            : "1px solid rgba(148, 163, 184, 0.25)")
+        (e.currentTarget.style.border = hasError
+          ? "1px solid rgb(239, 68, 68)"
+          : "1px solid rgba(148, 163, 184, 0.25)")
         }
       >
         <span style={{ color: selected ? "#f8fafc" : "#94a3b8" }}>
@@ -306,36 +306,20 @@ export default function RegistrationForm() {
           <div className="w-full">
             <div className="space-y-4">
               <div className="bg-slate-900/70 border-b border-white/10 shadow-2xl flex flex-col justify-center h-full backdrop-blur-xl">
-                <div className="p-4 sm:p-6 lg:p-8">
+                <div className="p-4 sm:p-5">
                   <form
                     ref={formRef}
                     onSubmit={handleSubmit}
-                    className="space-y-4 registration-form"
+                    className="space-y-2 registration-form"
                   >
-                    {/* Form Message Box */}
-                    {formMessage && (
-                      <div
-                        className={`mb-4 p-3 rounded border text-sm ${
-                          formMessageType === "success"
-                            ? "bg-green-50 border-green-400 text-green-700"
-                            : formMessageType === "error"
-                              ? "bg-red-50 border-red-400 text-red-700"
-                              : formMessageType === "loading"
-                                ? "bg-blue-50 border-blue-400 text-blue-700"
-                                : "bg-white border-gray-300 text-white"
-                        }`}
-                        style={{ fontWeight: 500 }}
-                      >
-                        {formMessage}
-                      </div>
-                    )}
+                   
 
                     {/* Prefix and First Name Row */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-1">
                         <label
                           htmlFor="prefix-select"
-                          className="block text-white mb-1 font-medium"
+                          className="block text-white mb-0.5 text-sm font-medium"
                         >
                           Prefix
                         </label>
@@ -358,7 +342,7 @@ export default function RegistrationForm() {
                       <div className="md:col-span-2 space-y-1">
                         <label
                           htmlFor="firstName"
-                          className="block text-white mb-1 font-medium"
+                          className="block text-white mb-0.5 text-sm font-medium"
                         >
                           First Name <span className="text-red-500">*</span>
                         </label>
@@ -382,7 +366,7 @@ export default function RegistrationForm() {
                       <div className="space-y-1">
                         <label
                           htmlFor="lastName"
-                          className="block text-white mb-1 font-medium"
+                          className="block text-white mb-0.5 text-sm font-medium"
                         >
                           Last Name <span className="text-red-500">*</span>
                         </label>
@@ -402,7 +386,7 @@ export default function RegistrationForm() {
                       <div className="space-y-1">
                         <label
                           htmlFor="companyName"
-                          className="block text-white mb-1 font-medium"
+                          className="block text-white mb-0.5 text-sm font-medium"
                         >
                           Company Name <span className="text-red-500">*</span>
                         </label>
@@ -426,7 +410,7 @@ export default function RegistrationForm() {
                       <div className="space-y-1">
                         <label
                           htmlFor="jobTitle"
-                          className="block text-white mb-1 font-medium"
+                          className="block text-white mb-0.5 text-sm font-medium"
                         >
                           Job Title <span className="text-red-500">*</span>
                         </label>
@@ -446,7 +430,7 @@ export default function RegistrationForm() {
                       <div className="space-y-1">
                         <label
                           htmlFor="email"
-                          className="block text-white mb-1 font-medium"
+                          className="block text-white mb-0.5 text-sm font-medium"
                         >
                           Email Address <span className="text-red-500">*</span>
                         </label>
@@ -468,16 +452,15 @@ export default function RegistrationForm() {
                     {/* Phone and Country Row */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1">
-                        <label className="block text-white mb-1 font-medium">
+                        <label className="block text-white mb-0.5 text-sm font-medium">
                           Phone Number <span className="text-red-500">*</span>
                         </label>
                         <PhoneInput
                           defaultCountry={country}
                           value={mobile}
                           onChange={setMobile}
-                          className={`w-full${
-                            errors.mobile ? " input-field-error" : ""
-                          }`}
+                          className={`w-full${errors.mobile ? " input-field-error" : ""
+                            }`}
                           inputClassName="w-full bg-slate-950/30 border-0 border-b-2 border-slate-600 rounded-[12px] focus:border-[#22c55e] px-0 shadow-none focus:outline-none focus:ring-0 py-2 text-slate-100 placeholder:text-slate-500"
                           placeholder="Phone Number *"
                           countrySelectorStyleProps={{
@@ -494,7 +477,7 @@ export default function RegistrationForm() {
 
                       {/* Country — exact same visual footprint as phone input */}
                       <div className="space-y-1">
-                        <label className="block text-white mb-1 font-medium">
+                        <label className="block text-white mb-0.5 text-sm font-medium">
                           Country
                         </label>
                         {/* Wrapper uses exact same inline styles as the inputs */}
@@ -573,7 +556,7 @@ export default function RegistrationForm() {
                     <div className="space-y-1">
                       <label
                         htmlFor="mainObjective-select"
-                        className="block text-white mb-1 font-medium"
+                        className="block text-white mb-0.5 text-sm font-medium"
                       >
                         Main Objective for registering at AIAC WEST AFRICA{" "}
                         <span className="text-red-500">*</span>
@@ -601,7 +584,7 @@ export default function RegistrationForm() {
                     <div className="space-y-1">
                       <label
                         htmlFor="promocode"
-                        className="block text-slate-200 mb-1 font-medium"
+                        className="block text-slate-200 mb-0.5 text-sm font-medium"
                       >
                         Promocode <span className="text-amber-400">*</span>
                       </label>
@@ -622,7 +605,7 @@ export default function RegistrationForm() {
 
                     {/* Consent Section — modern custom checkbox */}
                     <div className="space-y-2">
-                      <label className="block text-white mb-1 font-medium">
+                      <label className="block text-white mb-0.5 text-sm font-medium">
                         Consent <span className="text-red-500">*</span>
                       </label>
 
@@ -642,17 +625,15 @@ export default function RegistrationForm() {
 
                         {/* Custom checkbox box */}
                         <div
-                          className={`relative flex-shrink-0 w-6 h-6 mt-0.5 rounded-md border-2 transition-all duration-200 shadow-inner ${
-                            consentChecked
+                          className={`relative flex-shrink-0 w-6 h-6 mt-0.5 rounded-md border-2 transition-all duration-200 shadow-inner ${consentChecked
                               ? "bg-[#22c55e] border-[#22c55e]"
                               : "bg-slate-800/60 border-slate-500 group-hover:border-[#22c55e]/70"
-                          }`}
+                            }`}
                         >
                           {/* Tick SVG — shown when checked */}
                           <svg
-                            className={`absolute inset-0 w-full h-full p-0.5 text-white transition-opacity duration-150 ${
-                              consentChecked ? "opacity-100" : "opacity-0"
-                            }`}
+                            className={`absolute inset-0 w-full h-full p-0.5 text-white transition-opacity duration-150 ${consentChecked ? "opacity-100" : "opacity-0"
+                              }`}
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="currentColor"
@@ -700,6 +681,22 @@ export default function RegistrationForm() {
                         theme="light"
                       />
                     </div>
+                     {/* Form Message Box */}
+                    {formMessage && (
+                      <div
+                        className={`mb-4 p-3 rounded border text-sm ${formMessageType === "success"
+                            ? "bg-green-50 border-green-400 text-green-700"
+                            : formMessageType === "error"
+                              ? "bg-red-50 border-red-400 text-red-700"
+                              : formMessageType === "loading"
+                                ? "bg-blue-50 border-blue-400 text-blue-700"
+                                : "bg-white border-gray-300 text-white"
+                          }`}
+                        style={{ fontWeight: 500 }}
+                      >
+                        {formMessage}
+                      </div>
+                    )}
 
                     {/* Submit Button */}
                     <div className="pt-3">
