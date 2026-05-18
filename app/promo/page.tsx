@@ -300,7 +300,7 @@ export default function RegistrationForm() {
   const closeSuccessPopup = () => setShowSuccessPopup(false);
 
   return (
-    <div className="bg-transparent">
+    <div className="bg-[#00191F]">
       <div className="w-full">
         <div className="flex justify-center items-center min-h-screen">
           <div className="w-full">
