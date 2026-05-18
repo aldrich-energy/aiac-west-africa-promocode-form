@@ -305,7 +305,7 @@ export default function RegistrationForm() {
         <div className="flex justify-center items-center min-h-screen">
           <div className="w-full">
             <div className="space-y-4">
-              <div className="bg-slate-900/70 border-b border-white/10 shadow-2xl flex flex-col justify-center h-full backdrop-blur-xl">
+              <div className="flex flex-col justify-center h-full">
                 <div className="p-4 sm:p-5">
                   <form
                     ref={formRef}
